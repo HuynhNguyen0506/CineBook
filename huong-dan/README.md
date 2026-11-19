@@ -20,6 +20,9 @@ Các bài viết theo **Laravel và MySQL** (công nghệ của đa số nhóm).
 4. [Tác vụ chạy ngầm: nhắc lịch, nhắc sinh nhật và các job tự động](04-tac-vu-chay-ngam-nhac-lich-sinh-nhat.md)
    Dùng khi cần việc tự chạy theo giờ: nhắc lịch trước 24 giờ và 2 giờ, nhắc suất chiếu, chúc mừng sinh nhật, lịch làm việc hằng ngày, cảnh báo kho, quét đơn quá hạn. Có hướng dẫn chạy bộ hẹn giờ trên máy cá nhân, Linux và Windows.
 
+5. [Đưa website lên mạng bằng ngrok để giáo viên xem](05-host-ngrok-cho-giao-vien-xem.md)
+   Dùng khi cần demo cho giáo viên mà chưa có hosting, hoặc cần địa chỉ HTTPS công khai để nhận IPN thanh toán và mở link email trên điện thoại. Có hướng dẫn cài ngrok, lấy authtoken, domain cố định, chỉnh cấu hình Laravel, giới hạn gói miễn phí và bảo mật.
+
 ## Gợi ý các bài tiếp theo (chưa viết)
 
 - Quên mật khẩu, đặt lại mật khẩu qua email (cả 3 đề, CineBook có yêu cầu riêng)
