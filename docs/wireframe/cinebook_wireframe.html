@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineBook - Interactive Booking Wireframe</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f5;
+            color: #171717;
+        }
+        /* Wireframe hatched pattern for booked/disabled seats */
+        .seat-booked {
+            background-image: repeating-linear-gradient(
+                45deg,
+                #e5e5e5,
+                #e5e5e5 4px,
+                #d4d4d4 4px,
+                #d4d4d4 8px
+            );
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Wireframe Header -->
+    <header class="bg-white border-b-2 border-neutral-800 sticky top-0 z-20">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 border-2 border-neutral-900 rounded flex items-center justify-center font-bold text-sm">CB</div>
+                <div>
+                    <h1 class="font-bold text-base leading-tight">CINEBOOK</h1>
+                    <p class="text-[11px] text-neutral-500 uppercase tracking-wider">Wireframe Luồng Đặt Vé</p>
+                </div>
+            </div>
+            <span class="text-xs font-mono border border-neutral-400 px-2 py-1 rounded bg-neutral-100">v1.0 Draft</span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+        
+        <!-- Stepper Progress Bar -->
+        <nav aria-label="Tiến trình đặt vé" class="mb-6 bg-white border-2 border-neutral-800 rounded-lg p-4">
+            <div class="grid grid-cols-4 gap-2 text-center" id="stepper-container">
+                <!-- Stepper items rendered by JS -->
+            </div>
+        </nav>
+
+        <!-- Inline Message Box (Replaces alert()) -->
+        <div id="message-box" class="hidden mb-4 p-3 rounded-lg border-2 text-sm font-medium flex items-center justify-between">
+            <span id="message-text"></span>
+            <button onclick="hideMessage()" class="ml-4 text-xs underline font-bold">Đóng</button>
+        </div>
+
+        <!-- STEP 1: Chọn Phim, Rạp, Ngày & Suất chiếu -->
+        <section id="step-1" class="step-section space-y-6">
+            <div class="bg-white border-2 border-neutral-800 rounded-lg p-5">
+                <h2 class="text-lg font-bold border-b border-neutral-300 pb-2 mb-4">1. Chọn Phim</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="movie-list">
+                    <!-- Movies rendered by JS -->
+                </div>
+            </div>
+
+            <div class="bg-white border-2 border-neutral-800 rounded-lg p-5 space-y-4">
+                <h2 class="text-lg font-bold border-b border-neutral-300 pb-2">2. Chọn Rạp, Ngày & Suất Chiếu</h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-neutral-600 mb-1">Thành phố</label>
+                        <select id="city-select" onchange="onCityChange()" class="w-full border-2 border-neutral-800 rounded-lg p-2.5 bg-white text-sm font-medium focus:outline-none">
+                            <!-- Cities rendered by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-neutral-600 mb-1">Rạp chiếu</label>
+                        <select id="theater-select" onchange="updateSelection()" class="w-full border-2 border-neutral-800 rounded-lg p-2.5 bg-white text-sm font-medium focus:outline-none">
+                            <!-- Theaters rendered by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-neutral-600 mb-2">Ngày chiếu</label>
+                    <div class="flex flex-wrap gap-2" id="date-list">
+                        <!-- Dates rendered by JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase text-neutral-600 mb-2">Khung giờ (Suất chiếu)</label>
+                    <div class="flex flex-wrap gap-2" id="time-list">
+                        <!-- Times rendered by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 1 Actions -->
+            <div class="flex justify-end">
+                <button onclick="goToStep(2)" class="px-6 py-3 bg-neutral-900 text-white font-semibold rounded-lg border-2 border-neutral-900 hover:bg-neutral-700 transition">
+                    Tiếp tục: Chọn ghế &rarr;
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 2: Sơ đồ chọn ghế (Seat Map) -->
+        <section id="step-2" class="step-section hidden space-y-6">
+            <div class="bg-white border-2 border-neutral-800 rounded-lg p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-300 pb-3 mb-5 gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold">Sơ đồ chọn ghế</h2>
+                        <p id="step2-subtitle" class="text-xs text-neutral-600"></p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 text-xs">
+                        <span class="flex items-center gap-1.5"><span class="w-4 h-4 border-2 border-neutral-800 bg-white rounded inline-block"></span> Trống</span>
+                        <span class="flex items-center gap-1.5"><span class="w-4 h-4 border-2 border-neutral-900 bg-neutral-900 rounded inline-block"></span> Đang chọn</span>
+                        <span class="flex items-center gap-1.5"><span class="w-4 h-4 border-2 border-neutral-400 seat-booked rounded inline-block"></span> Đã đặt</span>
+                    </div>
+                </div>
+
+                <!-- Screen Placeholder -->
+                <div class="mb-8 text-center">
+                    <div class="w-full max-w-md mx-auto h-8 border-2 border-neutral-800 bg-neutral-100 rounded-t-full flex items-center justify-center text-xs font-bold tracking-widest text-neutral-600">
+                        MÀN HÌNH CHIẾU
+                    </div>
+                </div>
+
+                <!-- Seat Map Grid -->
+                <div id="seat-map" class="space-y-4 overflow-x-auto pb-2">
+                    <!-- Rows rendered by JS -->
+                </div>
+
+                <!-- Seat Category Legend -->
+                <div class="mt-6 pt-4 border-t border-dashed border-neutral-400 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-center">
+                    <div class="p-2 border border-neutral-300 rounded bg-neutral-50"><strong>Hàng A - B:</strong> Gold (90.000đ)</div>
+                    <div class="p-2 border border-neutral-300 rounded bg-neutral-50"><strong>Hàng C - D:</strong> Platinum (120.000đ)</div>
+                    <div class="p-2 border border-neutral-300 rounded bg-neutral-50"><strong>Hàng E:</strong> Box (180.000đ)</div>
+                </div>
+            </div>
+
+            <!-- Live Calculation Bar -->
+            <div class="bg-white border-2 border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs text-neutral-500 uppercase font-bold">Ghế đã chọn</p>
+                    <p id="selected-seats-display" class="font-bold text-sm">Chưa chọn ghế nào</p>
+                </div>
+                <div class="sm:text-right">
+                    <p class="text-xs text-neutral-500 uppercase font-bold">Tổng tiền tạm tính</p>
+                    <p id="total-price-display" class="text-xl font-bold font-mono">0đ</p>
+                </div>
+            </div>
+
+            <!-- Step 2 Actions -->
+            <div class="flex justify-between gap-3">
+                <button onclick="goToStep(1)" class="px-5 py-3 bg-white text-neutral-900 font-semibold rounded-lg border-2 border-neutral-800 hover:bg-neutral-100 transition">
+                    &larr; Quay lại
+                </button>
+                <button onclick="goToStep(3)" class="px-6 py-3 bg-neutral-900 text-white font-semibold rounded-lg border-2 border-neutral-900 hover:bg-neutral-700 transition">
+                    Tiếp tục: Thanh toán &rarr;
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 3: Thanh toán giả lập (Dummy Payment) -->
+        <section id="step-3" class="step-section hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Order Summary -->
+                <div class="bg-white border-2 border-neutral-800 rounded-lg p-5 space-y-3">
+                    <h2 class="text-lg font-bold border-b border-neutral-300 pb-2">Tóm tắt đơn hàng</h2>
+                    <div class="text-sm space-y-2" id="order-summary">
+                        <!-- Summary populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="bg-white border-2 border-neutral-800 rounded-lg p-5 space-y-4">
+                    <h2 class="text-lg font-bold border-b border-neutral-300 pb-2">Phương thức thanh toán (Dummy)</h2>
+                    <div class="space-y-3">
+                        <label class="flex items-center gap-3 p-3 border-2 border-neutral-800 rounded-lg cursor-pointer bg-neutral-50">
+                            <input type="radio" name="payment-method" value="Thẻ ATM / Visa / Mastercard" checked class="w-4 h-4 accent-neutral-900">
+                            <div>
+                                <p class="font-bold text-sm">Thẻ nội địa / Quốc tế</p>
+                                <p class="text-xs text-neutral-500">Visa, Mastercard, ATM (Giả lập)</p>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 border-2 border-neutral-300 rounded-lg cursor-pointer hover:border-neutral-800">
+                            <input type="radio" name="payment-method" value="Ví điện tử (MoMo / ZaloPay)" class="w-4 h-4 accent-neutral-900">
+                            <div>
+                                <p class="font-bold text-sm">Ví điện tử</p>
+                                <p class="text-xs text-neutral-500">MoMo, ZaloPay, VNPay QR (Giả lập)</p>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div class="pt-3 border-t border-dashed border-neutral-400 space-y-2">
+                        <button onclick="processPayment(true)" class="w-full py-3 bg-neutral-900 text-white font-bold rounded-lg border-2 border-neutral-900 hover:bg-neutral-700 transition">
+                            ✓ Thanh toán thành công (Dummy)
+                        </button>
+                        <button onclick="processPayment(false)" class="w-full py-2.5 bg-white text-neutral-900 font-semibold rounded-lg border-2 border-dashed border-neutral-800 hover:bg-neutral-100 transition text-sm">
+                            ✕ Giả lập lỗi thanh toán
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 Actions -->
+            <div class="flex justify-start">
+                <button onclick="goToStep(2)" class="px-5 py-3 bg-white text-neutral-900 font-semibold rounded-lg border-2 border-neutral-800 hover:bg-neutral-100 transition">
+                    &larr; Quay lại chọn ghế
+                </button>
+            </div>
+        </section>
+
+        <!-- STEP 4: Vé điện tử (E-Ticket) -->
+        <section id="step-4" class="step-section hidden space-y-6">
+            <div class="max-w-lg mx-auto bg-white border-2 border-neutral-900 rounded-lg overflow-hidden">
+                <!-- Ticket Header -->
+                <div class="bg-neutral-900 text-white p-4 text-center">
+                    <p class="text-xs uppercase tracking-widest text-neutral-300">Đặt vé thành công</p>
+                    <h2 class="text-xl font-bold mt-1">VÉ ĐIỆN TỬ (E-TICKET)</h2>
+                </div>
+
+                <!-- Ticket Body -->
+                <div class="p-6 space-y-4">
+                    <div class="flex items-center justify-between border-b-2 border-dashed border-neutral-300 pb-4">
+                        <div>
+                            <p class="text-xs text-neutral-500 uppercase">Mã đặt vé (Booking ID)</p>
+                            <p id="ticket-id" class="text-lg font-mono font-bold tracking-wider"></p>
+                        </div>
+                        <span class="px-2.5 py-1 border-2 border-neutral-900 rounded text-xs font-bold uppercase">CONFIRMED</span>
+                    </div>
+
+                    <div id="ticket-details" class="text-sm space-y-2.5">
+                        <!-- Details populated by JS -->
+                    </div>
+
+                    <!-- Dummy QR Code SVG -->
+                    <div class="pt-4 border-t-2 border-dashed border-neutral-300 flex flex-col items-center">
+                        <div class="p-3 border-2 border-neutral-900 rounded-lg bg-white">
+                            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Mã QR giả lập">
+                                <rect x="4" y="4" width="32" height="32" stroke="#171717" stroke-width="6"/>
+                                <rect x="14" y="14" width="12" height="12" fill="#171717"/>
+                                <rect x="84" y="4" width="32" height="32" stroke="#171717" stroke-width="6"/>
+                                <rect x="94" y="14" width="12" height="12" fill="#171717"/>
+                                <rect x="4" y="84" width="32" height="32" stroke="#171717" stroke-width="6"/>
+                                <rect x="14" y="94" width="12" height="12" fill="#171717"/>
+                                <rect x="48" y="8" width="8" height="8" fill="#171717"/>
+                                <rect x="64" y="8" width="8" height="24" fill="#171717"/>
+                                <rect x="48" y="24" width="8" height="16" fill="#171717"/>
+                                <rect x="8" y="48" width="24" height="8" fill="#171717"/>
+                                <rect x="40" y="48" width="16" height="16" fill="#171717"/>
+                                <rect x="64" y="48" width="8" height="8" fill="#171717"/>
+                                <rect x="80" y="48" width="32" height="8" fill="#171717"/>
+                                <rect x="16" y="64" width="16" height="8" fill="#171717"/>
+                                <rect x="64" y="64" width="24" height="8" fill="#171717"/>
+                                <rect x="96" y="64" width="16" height="16" fill="#171717"/>
+                                <rect x="48" y="80" width="8" height="32" fill="#171717"/>
+                                <rect x="64" y="88" width="16" height="8" fill="#171717"/>
+                                <rect x="88" y="96" width="24" height="16" fill="#171717"/>
+                                <rect x="64" y="104" width="16" height="8" fill="#171717"/>
+                            </svg>
+                        </div>
+                        <p class="text-xs text-neutral-500 mt-2">Đưa mã QR này cho nhân viên soát vé tại rạp</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reset Button -->
+            <div class="text-center">
+                <button onclick="resetBooking()" class="px-6 py-3 bg-neutral-900 text-white font-semibold rounded-lg border-2 border-neutral-900 hover:bg-neutral-700 transition">
+                    Đặt vé mới
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Sample Data ---
+        const movies = [
+            { id: 1, title: "Lật Mặt 8: Vòng Tay Nắng", genre: "Tâm lý / Gia đình", duration: "132 phút", rating: "4.8/5" },
+            { id: 2, title: "Dune: Hành Tinh Cát 2", genre: "Khoa học viễn tưởng", duration: "166 phút", rating: "4.9/5" },
+            { id: 3, title: "Thám Tử Lừng Danh Conan", genre: "Hoạt hình / Trinh thám", duration: "110 phút", rating: "4.6/5" }
+        ];
+
+        const theatersByCity = {
+            "TP. Hồ Chí Minh": ["CineBook Quận 7 (Crescent)", "CineBook Sư Vạn Hạnh", "CineBook Lý Chính Thắng"],
+            "Hà Nội": ["CineBook Cầu Giấy", "CineBook Royal City"],
+            "Đà Nẵng": ["CineBook Hải Châu"]
+        };
+
+        const dates = ["Hôm nay (19/11)", "Ngày mai (20/11)", "Thứ 7 (21/11)"];
+        const times = ["10:30", "14:15", "18:00", "20:45", "22:15"];
+
+        // Seat configuration: Gold (90k), Platinum (120k), Box (180k)
+        const seatRows = [
+            { row: "A", type: "Gold", price: 90000, count: 8 },
+            { row: "B", type: "Gold", price: 90000, count: 8 },
+            { row: "C", type: "Platinum", price: 120000, count: 8 },
+            { row: "D", type: "Platinum", price: 120000, count: 8 },
+            { row: "E", type: "Box", price: 180000, count: 6 }
+        ];
+
+        // Pre-booked seats for wireframe simulation
+        const bookedSeats = ["A3", "A4", "B5", "C4", "C5", "D2", "E3"];
+
+        // --- Application State ---
+        let state = {
+            currentStep: 1,
+            movieId: 1,
+            city: "TP. Hồ Chí Minh",
+            theater: "CineBook Quận 7 (Crescent)",
+            date: dates[0],
+            time: times[2],
+            selectedSeats: [] // Array of { id, type, price }
+        };
+
+        const stepLabels = ["1. Suất chiếu", "2. Chọn ghế", "3. Thanh toán", "4. Vé điện tử"];
+
+        // --- Helper Functions ---
+        function formatVND(amount) {
+            return amount.toLocaleString('vi-VN') + 'đ';
+        }
+
+        function showMessage(text, isError = true) {
+            const box = document.getElementById('message-box');
+            const msgText = document.getElementById('message-text');
+            msgText.textContent = text;
+            box.classList.remove('hidden', 'bg-neutral-100', 'border-neutral-900', 'bg-neutral-900', 'text-white');
+            if (isError) {
+                box.classList.add('bg-neutral-100', 'border-neutral-900', 'text-neutral-900');
+            } else {
+                box.classList.add('bg-neutral-900', 'border-neutral-900', 'text-white');
+            }
+            box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function hideMessage() {
+            document.getElementById('message-box').classList.add('hidden');
+        }
+
+        // --- Render Functions ---
+        function renderStepper() {
+            const container = document.getElementById('stepper-container');
+            container.innerHTML = stepLabels.map((label, idx) => {
+                const stepNum = idx + 1;
+                const isActive = stepNum === state.currentStep;
+                const isCompleted = stepNum < state.currentStep;
+                let styleClass = "border border-neutral-300 text-neutral-400 bg-white";
+                if (isActive) styleClass = "border-2 border-neutral-900 bg-neutral-900 text-white font-bold";
+                else if (isCompleted) styleClass = "border-2 border-neutral-800 bg-neutral-200 text-neutral-900 font-semibold";
+
+                return `<div class="py-2 px-1 rounded text-xs sm:text-sm transition ${styleClass}">${label}</div>`;
+            }).join('');
+        }
+
+        function renderStep1() {
+            // Render Movies
+            const movieList = document.getElementById('movie-list');
+            movieList.innerHTML = movies.map(m => {
+                const isSelected = m.id === state.movieId;
+                return `
+                    <div onclick="selectMovie(${m.id})" class="cursor-pointer rounded-lg p-3 transition border-2 ${isSelected ? 'border-neutral-900 bg-neutral-100' : 'border-neutral-300 bg-white hover:border-neutral-600'}">
+                        <div class="w-full h-24 border border-dashed border-neutral-400 bg-neutral-50 rounded flex items-center justify-center text-xs font-mono text-neutral-400 mb-3">
+                            [POSTER PHIM]
+                        </div>
+                        <h3 class="font-bold text-sm leading-snug">${m.title}</h3>
+                        <p class="text-xs text-neutral-500 mt-1">${m.genre}</p>
+                        <div class="flex justify-between text-xs text-neutral-600 mt-2 pt-2 border-t border-neutral-200">
+                            <span>${m.duration}</span>
+                            <span class="font-semibold">★ ${m.rating}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render Cities
+            const citySelect = document.getElementById('city-select');
+            if (citySelect.options.length === 0) {
+                Object.keys(theatersByCity).forEach(city => {
+                    const opt = document.createElement('option');
+                    opt.value = city;
+                    opt.textContent = city;
+                    citySelect.appendChild(opt);
+                });
+            }
+            citySelect.value = state.city;
+
+            // Render Theaters
+            renderTheaters();
+
+            // Render Dates
+            document.getElementById('date-list').innerHTML = dates.map(d => {
+                const active = d === state.date;
+                return `<button onclick="selectDate('${d}')" class="px-3.5 py-2 text-xs sm:text-sm rounded-lg border-2 transition ${active ? 'border-neutral-900 bg-neutral-900 text-white font-semibold' : 'border-neutral-300 bg-white hover:border-neutral-800'}">${d}</button>`;
+            }).join('');
+
+            // Render Times
+            document.getElementById('time-list').innerHTML = times.map(t => {
+                const active = t === state.time;
+                return `<button onclick="selectTime('${t}')" class="px-4 py-2 text-xs sm:text-sm font-mono rounded-lg border-2 transition ${active ? 'border-neutral-900 bg-neutral-900 text-white font-bold' : 'border-neutral-300 bg-white hover:border-neutral-800'}">${t}</button>`;
+            }).join('');
+        }
+
+        function renderTheaters() {
+            const theaterSelect = document.getElementById('theater-select');
+            const list = theatersByCity[state.city] || [];
+            theaterSelect.innerHTML = list.map(t => `<option value="${t}">${t}</option>`).join('');
+            if (!list.includes(state.theater)) state.theater = list[0];
+            theaterSelect.value = state.theater;
+        }
+
+        function renderStep2() {
+            const movie = movies.find(m => m.id === state.movieId);
+            document.getElementById('step2-subtitle').textContent = `${movie.title} • ${state.theater} • ${state.date} (${state.time})`;
+
+            const seatMap = document.getElementById('seat-map');
+            seatMap.innerHTML = seatRows.map(rowObj => {
+                let seatsHtml = '';
+                for (let i = 1; i <= rowObj.count; i++) {
+                    const seatId = `${rowObj.row}${i}`;
+                    const isBooked = bookedSeats.includes(seatId);
+                    const isSelected = state.selectedSeats.some(s => s.id === seatId);
+
+                    let btnClass = "border-2 border-neutral-800 bg-white text-neutral-900 hover:bg-neutral-200";
+                    if (isBooked) {
+                        btnClass = "border-2 border-neutral-400 seat-booked text-neutral-400 cursor-not-allowed";
+                    } else if (isSelected) {
+                        btnClass = "border-2 border-neutral-900 bg-neutral-900 text-white font-bold";
+                    }
+
+                    const widthClass = rowObj.type === "Box" ? "w-12 sm:w-14" : "w-9 sm:w-10";
+
+                    seatsHtml += `
+                        <button 
+                            type="button"
+                            ${isBooked ? 'disabled' : `onclick="toggleSeat('${seatId}', '${rowObj.type}', ${rowObj.price})"`}
+                            class="${widthClass} h-9 sm:h-10 rounded text-xs font-mono transition flex items-center justify-center ${btnClass}"
+                            title="Ghế ${seatId} - ${rowObj.type} (${formatVND(rowObj.price)})"
+                        >
+                            ${seatId}
+                        </button>
+                    `;
+                }
+
+                return `
+                    <div class="flex items-center justify-center gap-2 min-w-[340px]">
+                        <span class="w-16 text-[11px] font-bold text-neutral-500 text-right pr-2">${rowObj.type}</span>
+                        <div class="flex gap-1.5 sm:gap-2">${seatsHtml}</div>
+                        <span class="w-16"></span>
+                    </div>
+                `;
+            }).join('');
+
+            updateSeatSummary();
+        }
+
+        function updateSeatSummary() {
+            const display = document.getElementById('selected-seats-display');
+            const totalEl = document.getElementById('total-price-display');
+            if (state.selectedSeats.length === 0) {
+                display.textContent = "Chưa chọn ghế nào";
+                totalEl.textContent = "0đ";
+            } else {
+                display.textContent = state.selectedSeats.map(s => `${s.id} (${s.type})`).join(', ');
+                const total = state.selectedSeats.reduce((sum, s) => sum + s.price, 0);
+                totalEl.textContent = formatVND(total);
+            }
+        }
+
+        function renderStep3() {
+            const movie = movies.find(m => m.id === state.movieId);
+            const total = state.selectedSeats.reduce((sum, s) => sum + s.price, 0);
+            const seatsText = state.selectedSeats.map(s => `${s.id} (${s.type})`).join(', ');
+
+            document.getElementById('order-summary').innerHTML = `
+                <div class="flex justify-between"><span class="text-neutral-500">Phim:</span><span class="font-bold text-right">${movie.title}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Rạp:</span><span class="font-medium text-right">${state.theater}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Suất chiếu:</span><span class="font-medium text-right">${state.time} - ${state.date}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Ghế đã chọn:</span><span class="font-bold text-right">${seatsText}</span></div>
+                <div class="flex justify-between pt-3 border-t-2 border-dashed border-neutral-300 text-base">
+                    <span class="font-bold">Tổng thanh toán:</span>
+                    <span class="font-mono font-bold text-lg">${formatVND(total)}</span>
+                </div>
+            `;
+        }
+
+        function renderStep4() {
+            const movie = movies.find(m => m.id === state.movieId);
+            const total = state.selectedSeats.reduce((sum, s) => sum + s.price, 0);
+            const seatsText = state.selectedSeats.map(s => `${s.id} (${s.type})`).join(', ');
+            const bookingId = "CB-2026-" + Math.floor(1000 + Math.random() * 9000);
+            const paymentMethod = document.querySelector('input[name="payment-method"]:checked')?.value || "Dummy Payment";
+
+            document.getElementById('ticket-id').textContent = bookingId;
+            document.getElementById('ticket-details').innerHTML = `
+                <div class="flex justify-between"><span class="text-neutral-500">Phim:</span><span class="font-bold text-right">${movie.title}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Rạp chiếu:</span><span class="font-medium text-right">${state.theater}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Suất chiếu:</span><span class="font-medium text-right">${state.time} | ${state.date}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Số ghế & Hạng:</span><span class="font-bold text-right">${seatsText}</span></div>
+                <div class="flex justify-between"><span class="text-neutral-500">Thanh toán:</span><span class="font-medium text-right">${paymentMethod}</span></div>
+                <div class="flex justify-between pt-2 border-t border-neutral-200"><span class="font-bold">Tổng cộng:</span><span class="font-mono font-bold">${formatVND(total)}</span></div>
+            `;
+        }
+
+        // --- Event Handlers ---
+        function selectMovie(id) {
+            state.movieId = id;
+            renderStep1();
+        }
+
+        function onCityChange() {
+            state.city = document.getElementById('city-select').value;
+            renderTheaters();
+        }
+
+        function updateSelection() {
+            state.theater = document.getElementById('theater-select').value;
+        }
+
+        function selectDate(d) {
+            state.date = d;
+            renderStep1();
+        }
+
+        function selectTime(t) {
+            state.time = t;
+            renderStep1();
+        }
+
+        function toggleSeat(id, type, price) {
+            hideMessage();
+            const index = state.selectedSeats.findIndex(s => s.id === id);
+            if (index > -1) {
+                state.selectedSeats.splice(index, 1);
+            } else {
+                state.selectedSeats.push({ id, type, price });
+            }
+            renderStep2();
+        }
+
+        function goToStep(step) {
+            hideMessage();
+            // Validation before moving from Step 2 to Step 3
+            if (step === 3 && state.selectedSeats.length === 0) {
+                showMessage("Vui lòng chọn ít nhất 1 ghế trước khi tiếp tục thanh toán.");
+                return;
+            }
+
+            state.currentStep = step;
+            document.querySelectorAll('.step-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`step-${step}`).classList.remove('hidden');
+
+            renderStepper();
+            if (step === 1) renderStep1();
+            if (step === 2) renderStep2();
+            if (step === 3) renderStep3();
+            if (step === 4) renderStep4();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function processPayment(isSuccess) {
+            if (isSuccess) {
+                hideMessage();
+                goToStep(4);
+            } else {
+                showMessage("Lỗi thanh toán giả lập: Giao dịch bị từ chối hoặc hết thời gian chờ. Vui lòng thử lại hoặc chọn phương thức khác.");
+            }
+        }
+
+        function resetBooking() {
+            state.selectedSeats = [];
+            goToStep(1);
+        }
+
+        // Initialize Wireframe
+        window.onload = function() {
+            renderStepper();
+            renderStep1();
+        };
+    </script>
+</body>
+</html>
