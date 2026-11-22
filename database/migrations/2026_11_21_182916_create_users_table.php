@@ -13,10 +13,27 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
+            $table->string('name', 100);
+            $table->string('email')->unique();
+            $table->string('phone', 20)->nullable();
+            $table->string('avatar')->nullable();
+
+            $table->string('password');
+
+            // user hoặc admin
+            $table->string('role', 20)->default('user');
+
+            // active hoặc inactive
+            $table->string('status', 20)->default('active');
+
+            $table->timestamp('email_verified_at')->nullable();
+            $table->rememberToken();
             $table->timestamps();
+
+            $table->index(['role', 'status']);
         });
     }
-
     /**
      * Reverse the migrations.
      */

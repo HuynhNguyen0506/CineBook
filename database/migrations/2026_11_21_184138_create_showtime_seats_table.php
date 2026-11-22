@@ -6,20 +6,39 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('showtime_seats', function (Blueprint $table) {
             $table->id();
+
+            $table->foreignId('showtime_id')
+                ->constrained('showtimes')
+                ->restrictOnDelete();
+
+            $table->foreignId('seat_id')
+                ->constrained('seats')
+                ->restrictOnDelete();
+
+            // available, held, booked
+            $table->string('status', 20)->default('available');
+
+            $table->foreignId('held_by_user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->uuid('hold_token')->nullable();
+            $table->dateTime('held_until')->nullable();
+
             $table->timestamps();
+
+            $table->unique(['showtime_id', 'seat_id']);
+
+            $table->index(['showtime_id', 'status']);
+            $table->index('held_until');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('showtime_seats');
