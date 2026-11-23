@@ -17,8 +17,13 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function logout(){
-        return view('auth.login');
+    public function logout(Request $request){
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')
+            ->with('success', 'Đăng xuất thành công!');
     }
 
     public function submitLogin(Request $request){
@@ -38,6 +43,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'username' => $user->username,
+                'role' => $user->role,
             ]);
             return redirect()->route('home') -> with('success', 'Đăng nhập thành công!');
         } else {

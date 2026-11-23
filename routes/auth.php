@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 //Login
 Route::get('/login', [AuthController::class, 'login']) -> name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('user')-> name('logout');
 Route::post('/login', [AuthController::class, 'submitLogin']) -> name('submitLogin');
 
 //Forgot Password
