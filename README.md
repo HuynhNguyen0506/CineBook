@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
 ## 1. Công nghệ sử dụng
@@ -435,3 +436,6 @@ Các thành viên cần trao đổi và thống nhất tên bảng, tên cột, 
 ---
 
 *README này là tài liệu hướng dẫn cài đặt và quy trình làm việc chung của nhóm CineBook. Các thành viên cần đọc và thực hiện đúng hướng dẫn trước khi bắt đầu phát triển chức năng.*
+=======
+# CineBook
+>>>>>>> origin/main

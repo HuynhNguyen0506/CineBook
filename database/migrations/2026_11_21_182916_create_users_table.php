@@ -24,8 +24,8 @@ return new class extends Migration
             // user hoặc admin
             $table->string('role', 20)->default('user');
 
-            // active hoặc inactive
-            $table->string('status', 20)->default('active');
+            // verifed or not
+            $table->string('status', 20)->default('Unverified');
 
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
