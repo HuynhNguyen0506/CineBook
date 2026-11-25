@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -38,6 +39,7 @@ class AuthController extends Controller
         $user = User::where('email', $request->login) -> orWhere('phone', $request->login) -> first();
         if ($user && Hash::check($request->password, $user->password)) {
             $request -> session() -> regenerate();
+            Auth::login($user);
             session([
                 'id' => $user->id,
                 'email' => $user->email,

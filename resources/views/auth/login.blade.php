@@ -1,3 +1,4 @@
+<x-alert />
 <div class="">
     <h3>Đăng nhập</h3>
     <p>Vui lòng đăng nhập để tiếp tục</p>
@@ -11,7 +12,7 @@
     </div>
     <div>
         <label for="">Mật khẩu</label>
-        <input type="text" name="password">
+        <input type="password" name="password">
     </div>
     <div>
         <a href="{{route('password.request')}}">Quên mật khẩu</a>

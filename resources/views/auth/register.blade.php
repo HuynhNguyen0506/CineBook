@@ -1,3 +1,4 @@
+<x-alert />
 <div class="">
     <h3>Đăng ký</h3>
     <p>Tạo tài khoản mới</p>
